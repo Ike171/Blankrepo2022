@@ -1,21 +1,31 @@
 //© 2021 Sean Murdock
 
-let userName = "";
-let password = "";
+let phonenumber = "";
+let onetimepassword = "";
 let verifypassword = "";
 let passwordRegEx=/((?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%!]).{6,40})/;
-
-function setusername(){
-    userName = $("#username").val();
+let usertoken= "";
+function setphonenumber(){
+    phonenumber = $("#phonenumber").val();
 }
 
-function setuserpassword(){
-    password = $("#password").val();
-    var valid=passwordRegEx.exec(password);
-    if (!valid){
-        alert('Must be 6 digits, upper, lower, number, and symbol');
+const sendText=()=>{
+    $.ajax({
+        type: 'POST',
+         url: 'https://dev.stedi.me/twofactorlogin/'+phonenumber,
+         data: JSON.stringify({usertoken}),
+         contentType: "application/text",
+         dataType: 'text' })
+}
+
+
+function setuseronetimepassword(){
+    onetimepassword = $("#onetimepassword").val();
+    // var valid=passwordRegEx.exec(password);
+    // if (!valid){
+    //     alert('Must be 6 digits, upper, lower, number, and symbol');
     }
-}
+
 
 function setverifypassword(){
     verifypassword = $("#verifypassword").val();
@@ -38,7 +48,7 @@ function checkexpiredtoken(token){
     usertoken = localStorage.getItem("token");
     $.ajax({
        type: 'GET',
-        url: '/validate/'+token,
+        url: 'https://dev.stedi.me/validate/'+token,
         data: JSON.stringify({usertoken}),
         success: function(data){savetoken(data)},
         contentType: "application/text",
@@ -47,14 +57,14 @@ function checkexpiredtoken(token){
 }
 
 function userlogin(){
-    setuserpassword();
-    setusername();
+    setuseronetimepassword();
+    setphonenumber();
     $.ajax({
         type: 'POST',
-        url: '/login',
-        data: JSON.stringify({userName, password}),
+        url: 'https://dev.stedi.me/twofactorlogin',
+        data: JSON.stringify({phoneNumber:phonenumber, oneTimePassword:onetimepassword}),
         success: function(data) {
-            window.location.href = "/timer.html#"+data;//add the token to the url
+            window.location.href = "/timer.html#"+data;//https://dev.stedi.me/validate/4e3d3b08-71ac-4c8e-b14a-05d6f4efae62
         },
         contentType: "application/text",
         dataType: 'text'
@@ -92,7 +102,7 @@ function createbutton(){
 function createuser(){
     $.ajax({
         type: 'POST',
-        url: '/user',
+        url: 'https://dev.stedi.me/user',
         data: JSON.stringify({userName, 'email': userName, password, 'verifyPassword': vpwd, 'accountType':'Personal'}),//we are using the email as the user name
         success: function(data) { alert(data);
 //        readonlyforms("newUser");
@@ -106,7 +116,7 @@ function createuser(){
 function getstephistory(){
       $.ajax({
             type: 'POST',
-            url: '/stephistory',
+            url: 'https://dev.stedi.me/stephistory',
             data: JSON.stringify({userName}),
             success: function(data) { alert(data);
             json = $.parseJSON(data);
@@ -123,6 +133,6 @@ var enterFunction = (event) =>{
     }
 }
 
-var passwordField = document.getElementById("password");
+var passwordField = document.getElementById("onetimepassword");
 
 passwordField.addEventListener("keyup", enterFunction);
